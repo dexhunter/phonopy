@@ -448,11 +448,20 @@ def get_FORCE_CONSTANTS_lines(
     lines = []
     fc_shape = force_constants.shape
     lines.append("%4d %4d" % fc_shape[:2])
+    convert_blocks = (
+        type(force_constants) is np.ndarray
+        and force_constants.dtype == np.double
+        and force_constants.ndim == 4
+    )
+    row_format = "%22.15f" * 3
     for i, s_i in enumerate(indices):
         for j in range(fc_shape[1]):
             lines.append("%d %d" % (s_i + 1, j + 1))
-            for vec in force_constants[i][j]:
-                lines.append(("%22.15f" * 3) % tuple(vec))
+            block = force_constants[i][j]
+            if convert_blocks:
+                block = block.tolist()
+            for vec in block:
+                lines.append(row_format % tuple(vec))
 
     return lines
 
