@@ -516,20 +516,23 @@ def parse_FORCE_CONSTANTS(
     """
     with open(filename) as fcfile:
         idx1 = []
+        seen_indices = set()
+        readline = fcfile.readline
 
-        line = fcfile.readline()
+        line = readline()
         idx = [int(x) for x in line.split()]
         if len(idx) == 1:
             idx = [idx[0], idx[0]]
         force_constants = np.zeros((idx[0], idx[1], 3, 3), dtype="double")
         for i in range(idx[0]):
             for j in range(idx[1]):
-                s_i = int(fcfile.readline().split()[0]) - 1
-                if s_i not in idx1:
+                s_i = int(readline().split()[0]) - 1
+                if s_i not in seen_indices:
+                    seen_indices.add(s_i)
                     idx1.append(s_i)
                 tensor = []
                 for _ in range(3):
-                    tensor.append([float(x) for x in fcfile.readline().split()])
+                    tensor.append(list(map(float, readline().split())))
                 force_constants[i, j] = tensor
 
         check_force_constants_indices(
